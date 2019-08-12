@@ -66,35 +66,39 @@ class search():
 
         if self.table=="books" or self.table==None:
             first=True
+            ask=""
             for i in self.info.items():
                 if i[0] in ("writer","name","type"):
                     val="'"+i[1]+"'"
                 else:
                     val=i[1]
                 if first:
-                    ask="b_"+i[0]+"="+val
+                    ask+="b_"+i[0]+"="+val
                     first=False
                 else:
                     ask+=" AND b_"+i[0]+"="+val
             
-            cur.execute("SELECT * FROM books WHERE "+ask)
+            if ask!="": cur.execute("SELECT * FROM books WHERE "+ask)
+            else: cur.execute("SELECT * FROM books")
             result["books"]=cur.fetchall()
 
         unp=self.info.get("writer")==None
         if unp and(self.table=="collections" or self.table==None):
             first=True
+            ask=""
             for i in self.info.items():
                 if i[0] in ("name","type"):
                     val="'"+i[1]+"'"
                 else:
                     val=i[1]
                 if first:
-                    ask="c_"+i[0]+"="+val
+                    ask+="c_"+i[0]+"="+val
                     first=False
                 else:
                     ask+=" AND c_"+i[0]+"="+val
 
-            cur.execute("SELECT * FROM collections WHERE "+ask)
+            if ask!="": cur.execute("SELECT * FROM collections WHERE "+ask)
+            else: cur.execute("SELECT * FROM collections")
             result["collections"]=cur.fetchall()
 
         unp=True
@@ -111,7 +115,8 @@ class search():
                 else:
                     ask+=" AND p_"+i[0]+"="+val
 
-            cur.execute("SELECT * FROM col_parts WHERE "+ask)
+            if ask!="": cur.execute("SELECT * FROM col_parts WHERE "+ask)
+            else: cur.execute("SELECT * FROM col_parts")
             result["col_parts"]=cur.fetchall()
         
         cur.close()
