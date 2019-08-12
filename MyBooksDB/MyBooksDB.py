@@ -17,7 +17,9 @@ def addbook(mdbcon):
     need=input()
     print("Введите номер шкафа.")
     shelf=input()
-    DBwork.add_book(mdbcon,writer,name,year,count,type,need,shelf)
+    print("Если вы ввели всё правильно просто нажмите Enter, в ном случае - напишите 'нет'")
+    if input()=="нет": addbook(mdbcon)
+    else: DBwork.add_book(mdbcon,writer,name,year,count,type,need,shelf)
     print("Готово!")
 
 def addcoll(mdbcon):
@@ -33,26 +35,38 @@ def addcoll(mdbcon):
     need=input()
     print("Введите номер шкафа.")
     shelf=input()
-    a=DBwork.add_collection(mdbcon,name,year,count,type,need,shelf)
+    print("Если вы ввели всё правильно просто нажмите Enter, в ном случае - напишите 'нет'")
+    if input()=="нет": addcol(mdbcon)
+    else: a=DBwork.add_collection(mdbcon,name,year,count,type,need,shelf)
 
     print("Хотите ли вы сразу заполнить список частей этого сборника? (да,нет)")
-    if input()=="да": 
-        while 1:
-            addpart(mdbcon,a)
+    if input()=="да":
+        addpart(mdbcon,a)
+    print("Готово!")
+
+def addpart(mdbcon,c_id="kek"):
+    if c_id=="kek":
+        print("Найти сборник через id или через поиск? (id,поиск)")
+        t=input()
+        if t=="id":
+            print("Введите ID.")
+            c_id=input()
+        elif t=="поиск":
+            show(mdbcon,"col_parts")
+            print("Введите ID.")
+            c_id=input()
+    while 1:
+        print("Введите автора.")
+        writer=input()
+        print("Введите название.")
+        name=input()
+        print("Если вы ввели всё правильно просто нажмите Enter, в ном случае - напишите 'нет'")
+        if input()=="нет": addpart(mdbcon,c_id)
+        else:
+            DBwork.add_collection_part(mdbcon,c_id,writer,name)
             print("Ввести ещё часть? (да,нет)")
             if input()=="нет":
                 break
-    print("Готово!")
-
-def addpart(mdbcon,c_id):
-    if c_id=="kek":
-        print("Введите ID сборника, часть которого вы вводите.")
-        c_id=input()
-    print("Введите автора.")
-    writer=input()
-    print("Введите название.")
-    name=input()
-    DBwork.add_collection_part(mdbcon,c_id,writer,name)
     print("Готово!")
 
 def delete(mdbcon,table):
@@ -151,7 +165,7 @@ while 1:
         elif at=="сборник":
             addcoll(mdbcon)
         elif at=="часть сборника":
-            addpart(mdbcon,"kek")
+            addpart(mdbcon)
     elif t=="удалить":
         print("Что вы хотите удалить? (книга,сборник,часть сборника)")
         at=input()
