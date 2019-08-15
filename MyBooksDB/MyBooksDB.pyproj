@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>e190e787-b8bb-4f43-b52e-f63e31fa1115</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>MyBooksDB.py</StartupFile>
+    <StartupFile>MyBooksDB.pyw</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,7 +22,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DBwork.py" />
-    <Compile Include="MyBooksDB.py" />
+    <Compile Include="MyBooksDB.pyw" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="database.MDB" />

@@ -1,8 +1,14 @@
 import pypyodbc
 
+def stats(mdbcon,table=None):
+    if table!=None:
+        return "Count "+table
+    else:
+        return "Count of all"
+
 def add_book(mdbcon,writer,name,year,count,type,need,shelf):
     cur=mdbcon.cursor()
-    values="'"+writer+"','"+name+"',"+year+","+count+",'"+type+"',"+need+","+shelf
+    values="'"+str(writer)+"','"+str(name)+"',"+str(year)+","+str(count)+",'"+str(type)+"',"+str(need)+","+str(shelf)
     cur.execute("INSERT INTO books (b_writer,b_name,b_year,b_count,b_type,b_need,b_shelf) VALUES ("+values+")")
     mdbcon.commit()
     cur.close()
@@ -10,11 +16,11 @@ def add_book(mdbcon,writer,name,year,count,type,need,shelf):
 def add_collection(mdbcon,name,year,count,type,need,shelf):
     cur=mdbcon.cursor()
     
-    values="'"+name+"',"+year+","+count+",'"+type+"',"+need+","+shelf
+    values="'"+str(name)+"',"+str(year)+","+str(count)+",'"+str(type)+"',"+str(need)+","+str(shelf)
     cur.execute("INSERT INTO collections (c_name,c_year,c_count,c_type,c_need,c_shelf) VALUES ("+values+")")
     mdbcon.commit()
     
-    col="(c_name='"+name+"' AND c_year="+year+" AND c_count="+count+" AND c_type='"+type+"' AND c_need="+need+")"
+    col="(c_name='"+str(name)+"' AND c_year="+str(year)+" AND c_count="+str(count)+" AND c_type='"+str(type)+"' AND c_need="+str(need)+")"
     cur.execute("SELECT id FROM collections WHERE "+col)
     return cur.fetchall()[0][0]
     cur.close()
@@ -22,7 +28,7 @@ def add_collection(mdbcon,name,year,count,type,need,shelf):
 def add_collection_part(mdbcon,c_id,writer,name):
     cur=mdbcon.cursor()
 
-    values=str(c_id)+",'"+writer+"','"+name+"'"
+    values=str(c_id)+",'"+str(writer)+"','"+str(name)+"'"
     cur.execute("INSERT INTO col_parts (col_id,p_writer,p_name) VALUES ("+values+")")
     mdbcon.commit()
 
