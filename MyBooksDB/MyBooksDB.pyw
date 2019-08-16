@@ -60,6 +60,7 @@ class kekapp(QMainWindow):
     
     def phase_create(self):
         self.clean_phase()
+        self.c_id=None
 
         self.input_table=QComboBox()
         self.input_table.addItems(["Книга","Сборник","Часть сборника"])
@@ -67,8 +68,10 @@ class kekapp(QMainWindow):
         self.widgets.append(self.input_table)
         self.layout.addWidget(self.input_table,1,3,1,6)
 
-        self.input_type=QComboBox()
-        self.input_type.addItems(["Научная фантастика","Поэзия"])
+        self.input_type=QLineEdit()
+        types=["научная фантастика","поэзия","детская литература"]
+        completer=QCompleter(types,self.input_type)
+        self.input_type.setCompleter(completer)
         self.widgets.append(self.input_type)
         self.layout.addWidget(self.input_type,6,15,1,6)
 
@@ -79,6 +82,7 @@ class kekapp(QMainWindow):
 
         self.input_collection=QLineEdit()
         self.input_collection.setDisabled(True)
+        self.input_collection.textChanged[str].connect(self.col_check)
         self.widgets.append(self.input_collection)
         self.layout.addWidget(self.input_collection,2,3,1,20)
 
@@ -108,10 +112,11 @@ class kekapp(QMainWindow):
 
         self.lbl2=QLabel("Название сборника")
         self.widgets.append(self.lbl2)
-        self.layout.addWidget(self.lbl2,2,1,1,2)
+        self.layout.addWidget(self.lbl2,2,1,2,2)
 
         self.lbl3=QLabel("")
-        self.lbl3.setMaximumHeight(16)
+        self.lbl3.setAlignment(Qt.AlignCenter)
+        self.lbl3.setMaximumHeight(25)
         self.widgets.append(self.lbl3)
         self.layout.addWidget(self.lbl3,3,3,1,10)
 
@@ -160,16 +165,34 @@ class kekapp(QMainWindow):
             need=0
         
         if self.input_table.currentText()=="Книга":
-            DBwork.add_book(self.mdbcon,self.input_writer.text(),self.input_name.text(),self.input_year.text(),self.input_count.text(),self.input_type.currentText(),need,self.input_shelf.text())
-        if self.input_table.currentText()=="Сборник":
-            DBwork.add_collection(self.mdbcon,self.input_name.text(),self.input_year.text(),self.input_count.text(),self.input_type.currentText(),need,self.input_shelf.text())
-        if self.input_table.currentText()=="Часть сборника":
-            print("ne budu, sasi")
+            DBwork.add_book(self.mdbcon,self.input_writer.text(),self.input_name.text(),self.input_year.text(),self.input_count.text(),self.input_type.text(),need,self.input_shelf.text())
+            self.statusBar().showMessage("Запись создана")
+            self.input_clean()
+        elif self.input_table.currentText()=="Сборник":
+            DBwork.add_collection(self.mdbcon,self.input_name.text(),self.input_year.text(),self.input_count.text(),self.input_type.text(),need,self.input_shelf.text())
+            self.statusBar().showMessage("Запись создана")
+            msg=QMessageBox.question(self,"Заполнение сборника","Не хотите ли вы сразу же заполнить созданный сборник?",QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+            if msg==QMessageBox.Yes:
+                self.input_table.setCurrentText("Часть сборника")
+                name=self.input_name.text()
+                self.create_type_changed("Часть сборника")
+                self.input_collection.setText(name)
+            else:
+                self.input_clean()
+
+        elif self.input_table.currentText()=="Часть сборника" and self.c_id!=None:
+            DBwork.add_collection_part(self.mdbcon,self.c_id,self.input_writer.text(),self.input_name.text())
+            self.statusBar().showMessage("Запись создана")
+            self.input_clean()
+        else:
+            self.statusBar().showMessage("Ошибка, запись не создана")
+        
 
     def create_type_changed(self,type):
         for widget in self.widgets:
             widget.setDisabled(False)
         self.lbl3.setText("")
+        self.input_clean()
         if type=="Книга":
             self.input_collection.setDisabled(True)
         elif type=="Сборник":
@@ -181,6 +204,28 @@ class kekapp(QMainWindow):
             self.input_type.setDisabled(True)
             self.input_need.setDisabled(True)
             self.input_shelf.setDisabled(True)
+    
+    def col_check(self,name):
+        ask=DBwork.search(self.mdbcon)
+        ask.a_table("collections")
+        ask.a_name(name)
+        if len(ask.get_result()["collections"])==0:
+            self.lbl3.setStyleSheet("color:red;font-family:Arial;font-size:15pt")
+            self.lbl3.setText("Такого сборника не существует")
+            self.c_id=None
+        else:
+            self.lbl3.setStyleSheet("color:green;font-family:Arial;font-size:15pt")
+            self.lbl3.setText("Сборник найден")
+            self.c_id=ask.get_result()["collections"][0][0]
+
+    def input_clean(self):
+        self.input_writer.setText("")
+        self.input_name.setText("")
+        self.input_year.setText("")
+        self.input_count.setText("")
+        self.input_type.setText("")
+        self.input_shelf.setText("")
+        self.input_need.setCurrentText("Да")
 
     def phase_search(self):
         self.clean_phase()
