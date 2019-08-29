@@ -49,28 +49,33 @@ class search():
         self.mdbcon=mdbcon
         self.info={}
         self.table=None
+        self.col_id=None
+
     def a_table(self,table):
-        self.table=table
+        self.table=str(table)
+    def a_col_id(self,col_id):
+        self.col_id=str(col_id)
     def a_writer(self,writer):
-        self.info["writer"]=writer
+        self.info["writer"]=str(writer)
     def a_name(self,name):
-        self.info["name"]=name
+        self.info["name"]=str(name)
     def a_year(self,year):
-        self.info["year"]=year
+        self.info["year"]=str(year)
     def a_count(self,count):
-        self.info["count"]=count
+        self.info["count"]=str(count)
     def a_type(self,type):
-        self.info["type"]=type
+        self.info["type"]=str(type)
     def a_need(self,need):
-        self.info["need"]=need
+        self.info["need"]=str(need)
     def a_shelf(self,shelf):
-        self.info["shelf"]=shelf
+        self.info["shelf"]=str(shelf)
 
     def get_result(self):
         result={}
         cur=self.mdbcon.cursor()
 
-        if self.table=="books" or self.table==None:
+        unp=self.col_id==None
+        if unp and (self.table=="books" or self.table==None):
             first=True
             ask=""
             for i in self.info.items():
@@ -88,7 +93,7 @@ class search():
             else: cur.execute("SELECT * FROM books")
             result["books"]=cur.fetchall()
 
-        unp=self.info.get("writer")==None
+        unp=self.info.get("writer")==None and self.col_id==None
         if unp and(self.table=="collections" or self.table==None):
             first=True
             ask=""
@@ -120,7 +125,9 @@ class search():
                     first=False
                 else:
                     ask+=" AND p_"+i[0]+"="+val
-
+            
+            if self.col_id!=None and first==False: ask="col_id="+self.col_id+" AND "+ask
+            elif self.col_id!=None: ask="col_id="+self.col_id
             if ask!="": cur.execute("SELECT * FROM col_parts WHERE "+ask)
             else: cur.execute("SELECT * FROM col_parts")
             result["col_parts"]=cur.fetchall()
@@ -128,9 +135,22 @@ class search():
         cur.close()
         return result
 
-    def open_id(self,table,id):
-        cur=self.mdbcon.cursor()
-        cur.execute("SELECT * FROM "+table+" WHERE id="+id)
-        result=cur.fetchall()
-        cur.close()
-        return result
+def open_id(mdbcon,table,id):
+    cur=mdbcon.cursor()
+    cur.execute("SELECT * FROM "+table+" WHERE id="+id)
+    result=cur.fetchall()
+    cur.close()
+    return result[0]
+
+def update(mdbcon,table,pars,id):
+    cur=mdbcon.cursor()
+    first=True
+    changes=""
+    for par in pars.items():
+        if not first:
+            changes+=","
+        if par[0] in ("col_id","year","count","need","shelf"): changes+=par[0]+"="+par[1]
+        else: changes+=par[0]+"='"+par[1]+"'"
+    cur.execute("UPDATE "+table+" SET "+changes+" WHERE id="+id)
+    mdbcon.commit()
+    cur.close()
