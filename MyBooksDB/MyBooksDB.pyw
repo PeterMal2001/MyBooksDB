@@ -9,7 +9,7 @@ class kekapp(QMainWindow):
         super().__init__()
         self.mainwidget=QWidget()
         self.setCentralWidget(self.mainwidget)
-        self.setWindowTitle("Мои книги")
+        self.setWindowTitle("Книги")
         self.resize(1100,600)
         self.layout=QGridLayout(self.mainwidget)
         self.setFont(QFont("Arial",15))
