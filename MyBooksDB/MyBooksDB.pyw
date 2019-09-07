@@ -372,7 +372,7 @@ class kekapp(QMainWindow):
         self.scroller.setWidget(self.listwidget)
         self.widgets.append(self.scroller)
         self.layout.addWidget(self.scroller,1,1,10,22)
-        self.rows={}
+        self.rows=[]
 
         self.back_btn=QPushButton("Назад")
         self.back_btn.clicked.connect(self.phase_search)
@@ -383,37 +383,25 @@ class kekapp(QMainWindow):
         for item in self.result.items():
             for row in item[1]:
                 if item[0]=="books":
-                    self.rows[str(row[0])]=[QLabel("К"),QLabel(row[1]),QLabel(row[2]),QPushButton("Подробнее")]
-                    self.rows[str(row[0])][3].clicked.connect(self.passport)
-                    self.listlayout.addWidget(self.rows[str(row[0])][0],i,1)
-                    self.listlayout.addWidget(self.rows[str(row[0])][1],i,2,1,9)
-                    self.listlayout.addWidget(self.rows[str(row[0])][2],i,11,1,10)
-                    self.listlayout.addWidget(self.rows[str(row[0])][3],i,21,1,2)
-                    i+=1
+                    self.rows.append([str(row[0]),QLabel("К"),QLabel(row[1]),QLabel(row[2]),QPushButton("Подробнее")])
                 if item[0]=="collections":
-                    self.rows[str(row[0])]=[QLabel("С"),QLabel(""),QLabel(row[1]),QPushButton("Подробнее")]
-                    self.rows[str(row[0])][3].clicked.connect(self.passport)
-                    self.listlayout.addWidget(self.rows[str(row[0])][0],i,1)
-                    self.listlayout.addWidget(self.rows[str(row[0])][1],i,2,1,9)
-                    self.listlayout.addWidget(self.rows[str(row[0])][2],i,11,1,10)
-                    self.listlayout.addWidget(self.rows[str(row[0])][3],i,21,1,2)
-                    i+=1
+                    self.rows.append([str(row[0]),QLabel("С"),QLabel(""),QLabel(row[1]),QPushButton("Подробнее")])
                 if item[0]=="col_parts":
-                    self.rows[str(row[0])]=[QLabel("Ч"),QLabel(row[2]),QLabel(row[3]),QPushButton("Подробнее")]
-                    self.rows[str(row[0])][3].clicked.connect(self.passport)
-                    self.listlayout.addWidget(self.rows[str(row[0])][0],i,1)
-                    self.listlayout.addWidget(self.rows[str(row[0])][1],i,2,1,9)
-                    self.listlayout.addWidget(self.rows[str(row[0])][2],i,11,1,10)
-                    self.listlayout.addWidget(self.rows[str(row[0])][3],i,21,1,2)
-                    i+=1
+                    self.rows.append([str(row[0]),QLabel("Ч"),QLabel(row[2]),QLabel(row[3]),QPushButton("Подробнее")])
+                self.rows[-1][4].clicked.connect(self.passport)
+                self.listlayout.addWidget(self.rows[-1][1],i,1)
+                self.listlayout.addWidget(self.rows[-1][2],i,2,1,9)
+                self.listlayout.addWidget(self.rows[-1][3],i,11,1,10)
+                self.listlayout.addWidget(self.rows[-1][4],i,21,1,2)
+                i+=1
 
     def passport(self):
-        for row in self.rows.items():
-            if self.sender()==row[1][3]:
-                if row[1][0].text()=="К": self.passport=kekpassport(DBwork.open_id(self.mdbcon,"books",row[0]),"Книга",self.mdbcon)
-                if row[1][0].text()=="С": self.passport=kekpassport(DBwork.open_id(self.mdbcon,"collections",row[0]),"Сборник",self.mdbcon)
-                if row[1][0].text()=="Ч": self.passport=kekpassport(DBwork.open_id(self.mdbcon,"col_parts",row[0]),"Часть сборника",self.mdbcon)
-                self.windows.append(self.passport)
+        for row in self.rows:
+            if self.sender()==row[4]:
+                if row[1].text()=="К": self.passp=kekpassport(DBwork.open_id(self.mdbcon,"books",row[0]),"Книга",self.mdbcon)
+                if row[1].text()=="С": self.passp=kekpassport(DBwork.open_id(self.mdbcon,"collections",row[0]),"Сборник",self.mdbcon)
+                if row[1].text()=="Ч": self.passp=kekpassport(DBwork.open_id(self.mdbcon,"col_parts",row[0]),"Часть сборника",self.mdbcon)
+                self.windows.append(self.passp)
 
     def phase_settings(self):
         print("settings")
@@ -462,10 +450,11 @@ class kekpassport(QWidget):
             self.layout.addWidget(self.delete_btn,9,5,1,4)
             self.layout.addWidget(self.repair_btn,9,1,1,4)
         if table=="Сборник":
-            if a[5]=="True": a[5]="Да"
-            else: a[5]="Нет"
+            print(a)
+            if a[4]=="True": a[4]="Да"
+            else: a[4]="Нет"
             self.heads=QLabel("Тип:\nID:\nНазвание:\nГод:\nЧисло томов:\nЖанр:\nНеобходимость:\nНомер шкафа:")
-            self.values=QLabel(table+"\n"+a[0]+"\n"+a[1]+"\n"+a[2]+"\n"+a[3]+"\n"+a[4]+"\n"+a[5]+"\n"+a[6])
+            self.values=QLabel(table+"\n"+a[0]+"\n"+a[1]+"\n"+a[2]+"\n"+a[3]+"\n"+a[5]+"\n"+a[4]+"\n"+a[6])
             self.delete_btn=QPushButton("Удалить")
             self.repair_btn=QPushButton("Изменить")
             self.layout.addWidget(self.heads,1,1,7,2)
@@ -546,7 +535,8 @@ class repairing(QWidget):
         self.show()
         
     def repair(self):
-        if self.type.currentText()=="Необходимость": val=self.value.currentText()
+        if self.type.currentText()=="Необходимость" and self.value.currentText()=="Да": val="1"
+        elif self.type.currentText()=="Необходимость" and self.value.currentText()=="Нет": val="0"
         else: val=self.value.text()
         for i in {"Автор":"writer","Название":"name","Год издания":"year","Кол-во томов":"count","Жанр":"type","Необходимость":"need","Номер шкафа":"shelf"}.items():
             if self.type.currentText()==i[0]:
@@ -560,7 +550,7 @@ class repairing(QWidget):
                 kek.result[tab_convert(self.table)].append(DBwork.open_id(self.mdbcon,tab_convert(self.table),self.id))
         kek.phase_results()
 
-        kek.passport.close()
+        kek.passp.close()
         self.close()
 
     def type_changed(self,new_type):
