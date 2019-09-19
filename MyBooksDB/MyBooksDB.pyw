@@ -52,7 +52,7 @@ class kekapp(QMainWindow):
         self.widgets.append(self.sync_btn)
         self.layout.addWidget(self.sync_btn,7,1,2,10)
 
-        self.stats=QLabel("Статистика:\n\nВсего:\n"+DBwork.stats(self.mdbcon)+"\nКниг:\n"+DBwork.stats(self.mdbcon,"books")+"\nСборников:\n"+DBwork.stats(self.mdbcon,"collections")+"\nЧастей сборников:\n"+DBwork.stats(self.mdbcon,"col_parts"))
+        self.stats=QLabel("Статистика:\n\nВсего:\n"+str(DBwork.stats(self.mdbcon))+"\nКниг:\n"+str(DBwork.stats(self.mdbcon,"books"))+"\nСборников:\n"+str(DBwork.stats(self.mdbcon,"collections"))+"\nЧастей сборников:\n"+str(DBwork.stats(self.mdbcon,"col_parts")))
         self.stats.setAlignment(Qt.AlignCenter)
         self.widgets.append(self.stats)
         self.layout.addWidget(self.stats,1,14,9,6)

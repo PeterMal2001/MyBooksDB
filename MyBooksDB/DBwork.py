@@ -1,10 +1,22 @@
 import pypyodbc
 
 def stats(mdbcon,table=None):
+    cur=mdbcon.cursor()
+
     if table!=None:
-        return "Count "+table
+        cur.execute("SELECT * FROM "+table)
+        all=cur.fetchall()
+        count=len(all)
+        return count
     else:
-        return "Count of all"
+        count=0
+        for tab in ("col_parts","books","collections"):
+            cur.execute("SELECT * FROM "+tab)
+            all=cur.fetchall()
+            count+=len(all)
+        return count
+    
+    cur.close()
 
 def add_book(mdbcon,writer,name,year,count,type,need,shelf):
     cur=mdbcon.cursor()
